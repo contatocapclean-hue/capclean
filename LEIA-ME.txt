@@ -1,0 +1,17 @@
+SITE CAPCLEAN — COMO PUBLICAR NO SEU DOMÍNIO
+
+Arquivos (todos ficam na mesma pasta, a raiz do site — public_html ou www):
+  index.html          a página completa (site + orçamento)
+  precos.json         a tabela de preços do orçamento
+  mark.webp           o símbolo da logo
+  favicon.png, apple-touch-icon.png, og.jpg   ícones e imagem de compartilhamento
+
+Para publicar:
+1. Entre no painel da sua hospedagem (Gerenciador de Arquivos).
+2. Abra a pasta public_html (ou www).
+3. Envie todos estes arquivos para dentro dela.
+4. Acesse seu domínio. O orçamento fica em seudominio.com.br/#orcamento
+
+Para mudar os preços no site do domínio:
+- Edite o arquivo precos.json (cada número é um preço) e envie de novo, ou
+- Altere os preços pelo painel do site no Claude e peça um novo precos.json.
