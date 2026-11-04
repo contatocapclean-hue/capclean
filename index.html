@@ -490,6 +490,9 @@ footer{border-top:1px solid var(--line);padding-block:var(--s5);color:var(--mist
 .qrow{cursor:default}
 .qic .fig{width:44px;height:36px}
 
+.sums .hint.up{color:var(--ink);background:rgba(0,245,154,.08);border:1px dashed rgba(0,245,154,.45);border-radius:10px;padding:8px 10px}
+.sums .hint.up b{color:var(--green)}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -932,7 +935,10 @@ const CAT=[
   opc:[{id:'ct_leve',l:'Leve',s:'Voil, linho fino',fig:()=>F.cortina('leve'),ref:30,un:'m'},{id:'ct_pesada',l:'Pesada',s:'Blackout, veludo',fig:()=>F.cortina('pesada'),ref:40,un:'m'}],
   extras:[{id:'ct_inst',l:'Retirada e reinstalação',s:'Nós tiramos e recolocamos a cortina',modo:'porm',ref:8}]},
 ];
-const GERAIS=[{id:'alm',l:'Almofada solta (cada)',s:'Somada em sofás retrátil, fixo e modulado',un:'',ref:15},{id:'g_imper',l:'Impermeabilização',s:'Percentual somado ao valor da limpeza',un:'%',ref:70},{id:'g_min',l:'Valor mínimo do atendimento',s:'Pedidos menores são cobrados por este valor',un:'R$',ref:150},{id:'g_desc_acima',l:'Desconto para pedidos a partir de',s:'Deixe em branco para não dar desconto',un:'R$',ref:600},{id:'g_desc_pct',l:'Percentual de desconto',un:'%',ref:5}];
+const GERAIS=[{id:'alm',l:'Almofada solta (cada)',s:'Somada em sofás retrátil, fixo e modulado',un:'',ref:15},{id:'g_imper',l:'Impermeabilização',s:'Percentual somado ao valor da limpeza',un:'%',ref:70},{id:'g_min',l:'Valor mínimo do atendimento',s:'Pedidos menores são cobrados por este valor',un:'R$',ref:150},{id:'g_desc_acima',l:'1ª faixa: desconto a partir de',s:'Deixe em branco para não dar desconto',un:'R$',ref:350},{id:'g_desc_pct',l:'1ª faixa: percentual de desconto',un:'%',ref:5},{id:'g_desc2_acima',l:'2ª faixa: desconto a partir de',s:'Opcional. Valor maior que o da 1ª faixa',un:'R$',ref:700},{id:'g_desc2_pct',l:'2ª faixa: percentual de desconto',un:'%',ref:10}];
+// faixas de desconto válidas, da menor para a maior
+function tiers(){return [[pv('g_desc_acima'),pv('g_desc_pct')],[pv('g_desc2_acima'),pv('g_desc2_pct')]].filter(([a,p])=>a!=null&&p>0).sort((x,y)=>x[0]-y[0])}
+function discount(sub){const T=tiers();let ap=null,nx=null;for(const t of T){if(sub>=t[0])ap=t;else if(!nx)nx=t}return{desc:ap?sub*ap[1]/100:0,ap,nx}}
 const byId=Object.fromEntries(CAT.map(c=>[c.id,c]));
 
 let P={};
@@ -969,9 +975,9 @@ function calc(st){
 function minFor(c){let vals=[];if(c.tipo==='mod')vals=c.mods.map(m=>pv(m.id));else vals=c.opc.map(o=>pv(o.id));vals=vals.filter(v=>v!=null);if(!vals.length)return null;
   const m=Math.min(...vals);return c.tipo==='tap'?'R$ '+fmt2(m).replace(',00','')+'/m²':c.tipo==='cor'?'R$ '+fmt2(m).replace(',00','')+'/m':'a partir de '+brl(m).replace(',00','')}
 function totals(){let sub=0,pend=false,n=0;cart.forEach(i=>{const r=calc(i);if(r.empty)return;n+=r.q;sub+=r.total;if(r.pend)pend=true});
-  let desc=0;const da=pv('g_desc_acima'),dp=pv('g_desc_pct');if(da!=null&&dp&&sub>=da)desc=sub*dp/100;
+  const{desc,ap,nx}=discount(sub);
   const min=pv('g_min');let tot=sub-desc,minApplied=false;if(cart.length&&min!=null&&tot<min){tot=min;minApplied=true}
-  return{sub,desc,tot,pend,n,minApplied,min,da,dp}}
+  return{sub,desc,tot,pend,n,minApplied,min,ap,nx}}
 
 // ---------- render: categorias ----------
 const catsEl=$('#cats'),cfgEl=$('#cfg');
@@ -1051,8 +1057,9 @@ function renderCart(){
   else L.innerHTML='<ul class="items">'+cart.map((it,i)=>{const r=calc(it),c=byId[it.cat];return`<li class="item">${c.icon()}<div><b>${esc(r.label)}</b>${r.det?`<small>${esc(r.det)}</small>`:''}</div><div class="r">${r.pend?'<span class="v na">a confirmar</span>':`<span class="v">${brl(r.total)}</span>`}<div class="ctl">${c.qtd?`<div class="stepper sm" data-i="${i}"><button type="button" data-d="-1" aria-label="Diminuir">−</button><output>${r.q}</output><button type="button" data-d="1" aria-label="Aumentar">+</button></div>`:''}<button type="button" class="rm" data-rm="${i}" aria-label="Remover ${esc(r.label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div></div></li>`}).join('')+'</ul>';
   const t=totals();
   let s='';if(cart.length){s+=`<div><span>Subtotal (${t.n} ${t.n===1?'peça':'peças'})</span><span>${brl(t.sub)}</span></div>`;
-    if(t.desc)s+=`<div class="good"><span>Desconto de ${String(t.dp).replace('.',',')}%</span><span>− ${brl(t.desc)}</span></div>`;
-    else if(t.da!=null&&t.dp&&t.sub>0)s+=`<span class="hint">Faltam ${brl(t.da-t.sub)} para ganhar ${String(t.dp).replace('.',',')}% de desconto.</span>`;
+    const pc=v=>String(v).replace('.',',');
+    if(t.desc)s+=`<div class="good"><span>Desconto de ${pc(t.ap[1])}%</span><span>− ${brl(t.desc)}</span></div>`;
+    if(t.nx&&t.sub>0)s+=`<span class="hint up">${t.ap?'🎉 ':''}Faltam <b>${brl(t.nx[0]-t.sub)}</b> para ganhar <b>${pc(t.nx[1])}% de desconto</b>${t.ap?' (em vez de '+pc(t.ap[1])+'%)':''}.</span>`;
     s+=`<div class="tot"><span>Total estimado</span><b class="grad">${brl(t.tot)}</b></div>`;
     if(t.minApplied)s+=`<span class="hint">Aplicado o valor mínimo do atendimento (${brl(t.min)}).</span>`;
     if(t.pend)s+=`<span class="hint">Itens "a confirmar" serão orçados pela nossa equipe no WhatsApp.</span>`}
@@ -1064,7 +1071,7 @@ $('#cartList').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]
   const d=e.target.closest('[data-d]');if(d){const i=+d.parentElement.dataset.i;cart[i].qtd=Math.max(1,Math.min(50,(cart[i].qtd||1)+(+d.dataset.d)));save();renderCart()}});
 function msg(){const t=totals();const L=['Olá, CapClean! Montei meu orçamento pelo site:',''];
   cart.forEach(it=>{const r=calc(it);L.push(`• ${r.q>1?r.q+'× ':''}${r.label}${r.det?' ('+r.det+')':''} — ${r.pend?'a confirmar':brl(r.total)}`)});
-  L.push('');if(t.desc)L.push(`Desconto: − ${brl(t.desc)}`);L.push(`Total estimado: ${brl(t.tot)}${t.pend?' + itens a confirmar':''}`);
+  L.push('');if(t.desc)L.push(`Desconto (${String(t.ap[1]).replace('.',',')}%): − ${brl(t.desc)}`);L.push(`Total estimado: ${brl(t.tot)}${t.pend?' + itens a confirmar':''}`);
   const n=$('#qNome').value.trim(),b=$('#qBairro').value.trim(),d=$('#qData').value,p=$('#qPeriodo').value;
   L.push('');if(n)L.push('Nome: '+n);const ci=$('#qCidade').value;L.push('Local: '+(b?b+', ':'')+ci);if(d){const[y,m,dd]=d.split('-');L.push(`Data preferida: ${dd}/${m}/${y} (${p.toLowerCase()})`)}else L.push('Período preferido: '+p.toLowerCase());
   return L.join('\n')}
@@ -1117,8 +1124,8 @@ function fillSite(){
     el.textContent=t||'Ver opções';el.closest('.price')?.querySelector('small')?.replaceChildren(document.createTextNode(t?el.dataset.lbl||'A partir de':'Preços'))});
   const ex=[{cat:'retratil',opc:'r230',qtd:1,imper:true,ex:{},mods:{}},{cat:'tapete',opc:'t_sint',qtd:1,imper:false,ex:{},mods:{},larg:'2,00',comp:'2,50'},{cat:'cadeira',opc:'cj_encosto',qtd:6,imper:false,ex:{},mods:{}}];
   let sub=0,pend=false;document.querySelectorAll('[data-ex]').forEach((el,i)=>{if(!ex[i])return;const r=calc(ex[i]);sub+=r.total;if(r.pend)pend=true;el.textContent=r.pend?'—':brl(r.total).replace(',00','')});
-  const tot=document.getElementById('exTotal');if(tot){let d=0;const da=pv('g_desc_acima'),dp=pv('g_desc_pct');if(da!=null&&dp&&sub>=da)d=sub*dp/100;
-    tot.textContent=pend?'—':brl(sub-d).replace(',00','');const l=document.getElementById('exTotalL');if(l)l.textContent=d?`Total com ${String(dp).replace('.',',')}% de desconto`:'Total estimado'}
+  const tot=document.getElementById('exTotal');if(tot){const{desc:d,ap}=discount(sub);
+    tot.textContent=pend?'—':brl(sub-d).replace(',00','');const l=document.getElementById('exTotalL');if(l)l.textContent=d?`Total com ${String(ap[1]).replace('.',',')}% de desconto`:'Total estimado'}
 }
 
 // ---------- init ----------
