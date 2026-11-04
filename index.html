@@ -2,16 +2,15 @@
 <html lang="pt-BR" data-paths="1">
 <head>
 <meta charset="utf-8">
-<base href="/">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Orçamento online | CapClean Higienização Premium</title>
+<title>CapClean Higienização Premium | Sofá, tapete e cortina em Salvador</title>
 <meta name="description" content="Limpeza, higienização e impermeabilização de estofados, lavagem de tapetes e cortinas em Salvador e Região Metropolitana. Monte seu orçamento online.">
 <meta name="theme-color" content="#030828">
-<link rel="canonical" href="https://www.capclean.com.br/orcamento">
+<link rel="canonical" href="https://www.capclean.com.br/">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.capclean.com.br/orcamento">
+<meta property="og:url" content="https://www.capclean.com.br/">
 <meta property="og:title" content="CapClean Higienização Premium | Sofá, tapete e cortina em Salvador">
 <meta property="og:description" content="Limpeza, higienização e impermeabilização de estofados, lavagem de tapetes e cortinas em Salvador e Região Metropolitana. Monte seu orçamento online.">
 <meta property="og:image" content="https://www.capclean.com.br/og.jpg">
@@ -488,6 +487,9 @@ footer{border-top:1px solid var(--line);padding-block:var(--s5);color:var(--mist
 @keyframes guide{0%{box-shadow:0 0 0 0 rgba(0,245,154,.7)}100%{box-shadow:0 0 0 16px rgba(0,245,154,0)}}
 .badge{box-shadow:0 0 0 3px var(--abyss)}@media(max-width:760px){.badge{top:-7px;right:-7px}}
 
+.qrow{cursor:default}
+.qic .fig{width:44px;height:36px}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -895,6 +897,7 @@ const F={
     return sv('0 0 180 120',`<rect class="f" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><rect x="${x+6}" y="${y+6}" width="${Math.max(w-12,2)}" height="${Math.max(h-12,2)}"/><path class="dim" d="M${x} ${y+h+7}H${x+w}"/><text x="${90}" y="${Math.min(y+h+17,119)}" text-anchor="middle">${l?fmt2(l):'0,00'} m</text><path class="dim" d="M${x-7} ${y}V${y+h}"/><text x="${x-10}" y="${y+h/2+3}" text-anchor="end">${c?fmt2(c):'0,00'} m</text>`)},
   cortina(t){const cls=t==='pesada'?'f':'f2';return sv('0 0 100 80',`<path d="M8 6h84"/><path class="${cls}" d="M14 8v66h30c-6-18-4-46-10-66z"/><path class="${cls}" d="M86 8v66H56c6-18 4-46 10-66z"/><path class="d" d="M22 12v58M32 12v58M78 12v58M68 12v58"/>`)},
   cortinaIcon(){return sv('0 0 160 64',`<path d="M12 6h136"/><path class="f" d="M22 8v52h44c-8-16-6-38-12-52z"/><path class="f" d="M138 8v52H94c8-16 6-38 12-52z"/><path class="d" d="M34 12v44M48 12v44M126 12v44M112 12v44"/>`)},
+  almofada(){return sv('0 0 60 48',`<path class="f" d="M8 12q22-8 44 0q4 12 0 24q-22 8-44 0q-4-12 0-24z"/><path class="d" d="M14 24h32"/><circle class="dot" cx="30" cy="24" r="2.4"/>`)},
   medir(){let folds='';for(let i=0;i<7;i++){folds+=`<path class="d" d="M${46+i*17} 26v130"/>`}
     let rings='';for(let i=0;i<12;i++)rings+=`<circle cx="${40+i*22}" cy="16" r="4"/>`;
     return sv('0 0 320 210',`<rect class="dim" x="70" y="40" width="180" height="100" rx="3"/><path d="M20 16h280"/>${rings}<path class="f" d="M36 20v140h248V20z" style="opacity:.7"/>${folds}<path d="M36 160h248" stroke-width="4"/><path d="M36 184h248M36 184l8-5M36 184l8 5M284 184l-8-5M284 184l-8 5" stroke-width="2.2"/><path class="dim" d="M36 162v28M284 162v28"/><text x="160" y="204" text-anchor="middle" style="font-size:12px;fill:var(--ink)">Meça aqui: a barra, de ponta a ponta</text>`)},
@@ -905,11 +908,11 @@ const F={
 const CAT=[
  {id:'retratil',nome:'Sofá retrátil',icon:()=>F.retratil(2.6),hint:'Meça a largura total, de um braço ao outro, por fora.',grupo:'Largura do sofá',tipo:'opc',imper:true,qtd:true,
   opc:[['r180','1,80 m',1.8],['r200','2,00 m',2],['r210','2,10 m',2.1],['r230','2,30 m',2.3],['r250','2,50 m',2.5],['r270','2,70 m',2.7],['r290','2,90 m',2.9],['r300','3,00 m',3],['r350','3,50 m',3.5]].map(([id,l,m])=>({id,l,fig:()=>F.retratil(m),ref:Math.round(m*100)})),
-  nota:'Maior que 3,50 m? Envie a medida nos detalhes.'},
+  nota:'Maior que 3,50 m? Envie a medida nos detalhes.',extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'fixo',nome:'Sofá fixo',icon:()=>F.fixo(3),hint:'Sofá sem assento retrátil. Escolha pelo número de lugares.',grupo:'Lugares',tipo:'opc',imper:true,qtd:true,
-  opc:[{id:'f2',l:'2 lugares',fig:()=>F.fixo(2),ref:150},{id:'f3',l:'3 lugares',fig:()=>F.fixo(3),ref:180},{id:'f4',l:'4 lugares',fig:()=>F.fixo(4),ref:220},{id:'fL',l:'De canto (L)',fig:()=>F.fixo('L'),ref:280}]},
+  opc:[{id:'f2',l:'2 lugares',fig:()=>F.fixo(2),ref:150},{id:'f3',l:'3 lugares',fig:()=>F.fixo(3),ref:180},{id:'f4',l:'4 lugares',fig:()=>F.fixo(4),ref:220},{id:'fL',l:'De canto (L)',fig:()=>F.fixo('L'),ref:280}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'modulado',nome:'Sofá modulado',icon:()=>F.modulado(),hint:'Some os módulos do seu sofá. Cada peça separada conta como um módulo.',tipo:'mod',imper:true,qtd:false,
-  mods:[{id:'m_com',l:'Módulo com braço',s:'Ponta do sofá',t:'com',ref:80},{id:'m_sem',l:'Módulo sem braço',s:'Meio do sofá',t:'sem',ref:70},{id:'m_canto',l:'Módulo de canto',s:'Faz a curva do L',t:'canto',ref:90},{id:'m_chaise',l:'Chaise',s:'Assento alongado',t:'chaise',ref:100},{id:'m_puff',l:'Puff',s:'Peça solta',t:'puff',ref:40}]},
+  mods:[{id:'m_com',l:'Módulo com braço',s:'Ponta do sofá',t:'com',ref:80},{id:'m_sem',l:'Módulo sem braço',s:'Meio do sofá',t:'sem',ref:70},{id:'m_canto',l:'Módulo de canto',s:'Faz a curva do L',t:'canto',ref:90},{id:'m_chaise',l:'Chaise',s:'Assento alongado',t:'chaise',ref:100},{id:'m_puff',l:'Puff',s:'Peça solta',t:'puff',ref:40}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'colchao',nome:'Colchão',icon:()=>F.colchaoIcon(),hint:'Medidas padrão de colchões no Brasil. Confira a etiqueta se tiver dúvida.',grupo:'Tamanho',tipo:'opc',imper:true,qtd:true,
   opc:[['c_solt','Solteiro','0,88 × 1,88 m',.88,1.88,120],['c_soltk','Solteiro King','0,96 × 2,03 m',.96,2.03,140],['c_viuva','Viúva','1,28 × 1,88 m',1.28,1.88,150],['c_casal','Casal padrão','1,38 × 1,88 m',1.38,1.88,160],['c_queen','Queen','1,58 × 1,98 m',1.58,1.98,190],['c_king','King Size','1,93 × 2,03 m',1.93,2.03,220]].map(([id,l,s,W,L,ref])=>({id,l,s,fig:()=>F.colchao(W,L),ref})),
   extras:[{id:'c_2lados',l:'Higienizar os dois lados',s:'Para colchões dupla face',modo:'pct',ref:50},{id:'c_box',l:'Incluir a base box',s:'Tecido da base da cama',modo:'add',ref:50}]},
@@ -929,7 +932,7 @@ const CAT=[
   opc:[{id:'ct_leve',l:'Leve',s:'Voil, linho fino',fig:()=>F.cortina('leve'),ref:30,un:'m'},{id:'ct_pesada',l:'Pesada',s:'Blackout, veludo',fig:()=>F.cortina('pesada'),ref:40,un:'m'}],
   extras:[{id:'ct_inst',l:'Retirada e reinstalação',s:'Nós tiramos e recolocamos a cortina',modo:'porm',ref:8}]},
 ];
-const GERAIS=[{id:'g_imper',l:'Impermeabilização',s:'Percentual somado ao valor da limpeza',un:'%',ref:70},{id:'g_min',l:'Valor mínimo do atendimento',s:'Pedidos menores são cobrados por este valor',un:'R$',ref:150},{id:'g_desc_acima',l:'Desconto para pedidos a partir de',s:'Deixe em branco para não dar desconto',un:'R$',ref:600},{id:'g_desc_pct',l:'Percentual de desconto',un:'%',ref:5}];
+const GERAIS=[{id:'alm',l:'Almofada solta (cada)',s:'Somada em sofás retrátil, fixo e modulado',un:'',ref:15},{id:'g_imper',l:'Impermeabilização',s:'Percentual somado ao valor da limpeza',un:'%',ref:70},{id:'g_min',l:'Valor mínimo do atendimento',s:'Pedidos menores são cobrados por este valor',un:'R$',ref:150},{id:'g_desc_acima',l:'Desconto para pedidos a partir de',s:'Deixe em branco para não dar desconto',un:'R$',ref:600},{id:'g_desc_pct',l:'Percentual de desconto',un:'%',ref:5}];
 const byId=Object.fromEntries(CAT.map(c=>[c.id,c]));
 
 let P={};
@@ -949,7 +952,7 @@ function calc(st){
   const opt=c.opc&&c.opc.find(o=>o.id===st.opc);
   if(c.tipo==='opc'){label=c.id==='retratil'?c.nome+' '+opt.l:c.nome+' · '+opt.l;
     const v=pv(opt.id);if(v==null)pend=true;else base=v;if(opt.s&&c.id==='colchao')det.push(opt.s);
-    (c.extras||[]).forEach(e=>{if(!st.ex[e.id])return;det.push(e.l.toLowerCase());const x=pv(e.id);if(x==null){pend=true;return}base+=e.modo==='pct'?(pv(opt.id)||0)*x/100:x});
+    (c.extras||[]).forEach(e=>{if(e.modo==='qtd'||!st.ex[e.id])return;det.push(e.l.toLowerCase());const x=pv(e.id);if(x==null){pend=true;return}base+=e.modo==='pct'?(pv(opt.id)||0)*x/100:x});
   }
   if(c.tipo==='mod'){const parts=[];let n=0;c.mods.forEach(m=>{const q=st.mods[m.id]||0;if(!q)return;n+=q;parts.push(q+'× '+m.l.replace('Módulo ','').toLowerCase());const v=pv(m.id);if(v==null)pend=true;else base+=v*q});
     label=`${c.nome} · ${n} ${n===1?'módulo':'módulos'}`;det.push(parts.join(', '));if(!n)return{empty:true,label};}
@@ -958,6 +961,7 @@ function calc(st){
   if(c.tipo==='cor'){const m=num(st.metros);if(!(m>0))return{empty:true,label,needs:'Informe quantos metros lineares.'};
     label=`${c.nome} ${opt.l.toLowerCase()} · ${fmt2(m)} m`;det.push(opt.s.toLowerCase());const v=pv(opt.id);if(v==null)pend=true;else base=m*v;
     if(st.ex.ct_inst){det.push('com retirada e reinstalação');const x=pv('ct_inst');if(x==null)pend=true;else base+=m*x}}
+  (c.extras||[]).forEach(e=>{if(e.modo!=='qtd')return;const n=+st.ex[e.id]||0;if(!n)return;det.push(n+(n===1?' almofada solta':' almofadas soltas'));const x=pv(e.id);if(x==null)pend=true;else base+=n*x});
   if(c.imper&&st.imper){det.push('com impermeabilização');const p=pv('g_imper');if(p==null)pend=true;else base*=1+p/100}
   const q=c.qtd?Math.max(1,st.qtd|0):1;
   return{label,det:det.filter(Boolean).join(' · '),unit:base,q,total:base*q,pend};
@@ -997,7 +1001,7 @@ function renderCfg(){
   if(c.tipo==='cor'){h+=`<div class="howto"><div>${F.medir()}</div><div><h5>Como medir sua cortina</h5><ol><li><b>Estique a cortina</b>, sem as dobras, ou tire do varão.</li><li><b>Meça a barra</b>, a costura de baixo, de uma ponta à outra.</li><li>Se tiver <b>mais de uma folha</b>, some as medidas de todas.</li></ol></div></div>
     <div class="grp"><h4>Total de metros lineares</h4><div class="fields"><label class="fld" for="cMet">Metros lineares<span class="in"><input id="cMet" inputmode="decimal" placeholder="Ex.: 4,50" value="${esc(cur.metros)}"><span>m</span></span></label></div></div>`}
   const tg=[];
-  (c.extras||[]).forEach(e=>{const v=pv(e.id);const pr=v==null?'a confirmar':e.modo==='pct'?'+'+String(v).replace('.',',')+'%':e.modo==='porm'?'+'+brl(v)+'/m':'+'+brl(v);tg.push(`<label class="tgl" for="ex_${e.id}"><input type="checkbox" id="ex_${e.id}" data-ex="${e.id}" ${cur.ex[e.id]?'checked':''}><span class="sw"></span><div><b>${e.l}</b><small>${e.s}</small></div><span class="pr">${pr}</span></label>`)});
+  (c.extras||[]).forEach(e=>{const v=pv(e.id);if(e.modo==='qtd'){const n=+cur.ex[e.id]||0;tg.push(`<div class="tgl qrow"><span class="qic" aria-hidden="true">${F.almofada()}</span><div><b>${e.l}</b><small>${e.s} · ${v==null?'valor a confirmar':brl(v)+' cada'}</small></div><div class="stepper sm" data-exq="${e.id}"><button type="button" data-d="-1" aria-label="Menos ${e.l}">−</button><output>${n}</output><button type="button" data-d="1" aria-label="Mais ${e.l}">+</button></div></div>`);return}const pr=v==null?'a confirmar':e.modo==='pct'?'+'+String(v).replace('.',',')+'%':e.modo==='porm'?'+'+brl(v)+'/m':'+'+brl(v);tg.push(`<label class="tgl" for="ex_${e.id}"><input type="checkbox" id="ex_${e.id}" data-ex="${e.id}" ${cur.ex[e.id]?'checked':''}><span class="sw"></span><div><b>${e.l}</b><small>${e.s}</small></div><span class="pr">${pr}</span></label>`)});
   if(c.imper){const v=pv('g_imper');tg.push(`<label class="tgl" for="exImper"><input type="checkbox" id="exImper" ${cur.imper?'checked':''}><span class="sw"></span><div><b>Impermeabilização</b><small>Protege contra manchas de líquidos depois da limpeza</small></div><span class="pr">${v==null?'a confirmar':'+'+String(v).replace('.',',')+'%'}</span></label>`)}
   if(tg.length)h+=`<div class="grp"><h4>Adicionais</h4><div class="toggles">${tg.join('')}</div></div>`;
   h+=`</div><div class="addbar" id="addbar">${c.qtd?`<div class="q">${c.id==='tapete'?'Tapetes iguais':c.id==='cadeira'||c.id==='escritorio'?'Cadeiras':'Quantidade'}<div class="stepper" data-qtd><button type="button" data-d="-1" aria-label="Diminuir quantidade">−</button><output id="qtdOut">${cur.qtd}</output><button type="button" data-d="1" aria-label="Aumentar quantidade">+</button></div></div>`:''}<div class="lp" id="linePrice"></div><button type="button" class="btn btn-flow" id="addBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Adicionar ao orçamento</button></div>`;
@@ -1016,7 +1020,8 @@ function live(){
 cfgEl.addEventListener('click',e=>{
   const o=e.target.closest('[data-opt]');if(o){cur.opc=o.dataset.opt;cfgEl.querySelectorAll('[data-opt]').forEach(b=>b.setAttribute('aria-checked',b===o));live();nextStep();return}
   const d=e.target.closest('[data-d]');if(d){const st=d.parentElement,delta=+d.dataset.d;
-    if(st.dataset.mod!=null){const id=st.dataset.mod;cur.mods[id]=Math.max(0,Math.min(20,(cur.mods[id]||0)+delta));st.querySelector('output').textContent=cur.mods[id]}
+    if(st.dataset.exq!=null){const id=st.dataset.exq;cur.ex[id]=Math.max(0,Math.min(30,(+cur.ex[id]||0)+delta));st.querySelector('output').textContent=cur.ex[id]}
+    else if(st.dataset.mod!=null){const id=st.dataset.mod;cur.mods[id]=Math.max(0,Math.min(20,(cur.mods[id]||0)+delta));st.querySelector('output').textContent=cur.mods[id]}
     else{cur.qtd=Math.max(1,Math.min(50,cur.qtd+delta));st.querySelector('output').textContent=cur.qtd}live();return}
   if(e.target.closest('#addBtn'))addItem();
 });
@@ -1080,7 +1085,7 @@ function renderAdmin(){let h=`<div class="agrp"><h3>Regras gerais</h3>${GERAIS.m
   CAT.forEach(c=>{h+=`<div class="agrp"><h3>${c.icon()}${c.nome}</h3>`;
     (c.opc||[]).forEach(o=>h+=adRow(o.id,o.l,o.s,o.un,o.ref));(c.mods||[]).forEach(m=>h+=adRow(m.id,m.l,m.s,'',m.ref));
     if(c.minId)h+=adRow(c.minId,'Valor mínimo por tapete','','',c.minRef);
-    (c.extras||[]).forEach(e=>h+=adRow(e.id,e.l,e.s,e.modo==='pct'?'%':e.modo==='porm'?'m':'',e.ref));h+='</div>'});
+    (c.extras||[]).filter(e=>!e.shared).forEach(e=>h+=adRow(e.id,e.l,e.s,e.modo==='pct'?'%':e.modo==='porm'?'m':'',e.ref));h+='</div>'});
   $('#adminForm').innerHTML=h;$('#adminMsg').textContent='';$('#adminMsg').className='admin-msg';$('#adminFallback').hidden=true}
 function readAdmin(){const out={};let bad=null;AD.querySelectorAll('[data-pid]').forEach(i=>{const t=i.value.trim();if(!t)return;const v=num(t);if(!(v>=0)){bad=bad||i;return}out[i.dataset.pid]=Math.round(v*100)/100});return{out,bad}}
 $('#adminOpen').addEventListener('click',()=>{renderAdmin();AD.hidden=false;document.body.style.overflow='hidden';AD.querySelector('input')?.focus()});
