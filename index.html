@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-paths="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -89,7 +89,7 @@ p{margin:0;text-wrap:pretty}
 .links a[aria-current]{color:var(--ink)}
 .nav-cta{display:flex;gap:10px;align-items:center}
 @media(max-width:920px){.links{display:none}}
-@media(max-width:420px){.nav .btn-ghost{display:none}}
+@media(max-width:560px){.nav .btn-ghost{display:none}}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--body);font-weight:700;font-size:var(--t-sm);line-height:1.2;border:0;cursor:pointer;text-decoration:none;border-radius:999px;padding:15px 26px;transition:transform .25s,box-shadow .25s,border-color .25s,background .25s;white-space:nowrap}
 .btn svg{width:18px;height:18px;flex:none}
@@ -1125,13 +1125,31 @@ window.__quoteSelect=id=>selectCat(id,false);
 // ---------- rotas: site / orçamento ----------
 (function(){
   const site=document.getElementById('site'),quote=document.getElementById('quote'),nq=document.getElementById('navQuote');
-  function route(){const h=decodeURIComponent(location.hash.slice(1));
-    const q=h==='orcamento'||h.startsWith('orcamento-');
+  const PATH=document.documentElement.dataset.paths==='1';   // no domínio próprio: /orcamento sem #
+  const T0='CapClean Higienização Premium | Sofá, tapete e cortina em Salvador';
+  const isQ=h=>h==='orcamento'||h.startsWith('orcamento-');
+  function route(){
+    const h=decodeURIComponent(location.hash.slice(1));
+    let q,cat=null;
+    if(PATH){q=/^\/orcamento\/?$/.test(location.pathname)||isQ(h);cat=(history.state&&history.state.cat)||(isQ(h)?h.split('-')[1]:null);
+      if(isQ(h))history.replaceState({cat},'','/orcamento');}
+    else{q=isQ(h);cat=q?h.split('-')[1]:null}
     const wasQ=!quote.hidden;site.hidden=q;quote.hidden=!q;document.body.classList.toggle('in-quote',q);
     nav.classList.toggle('solid',q);if(q)nq.setAttribute('aria-current','page');else nq.removeAttribute('aria-current');
-    if(q){const cat=h.split('-')[1];if(cat&&window.__quoteSelect)window.__quoteSelect(cat);if(!wasQ||cat)scrollTo(0,0);return}
+    if(PATH)document.title=q?'Orçamento online | CapClean Higienização Premium':T0;
+    if(q){if(cat&&window.__quoteSelect)window.__quoteSelect(cat);if(!wasQ||cat)scrollTo(0,0);return}
     if(h==='inicio'||!h){scrollTo(0,0);return}
     const el=document.getElementById(h);if(el)requestAnimationFrame(()=>el.scrollIntoView({behavior:wasQ?'auto':'smooth'}));}
+  if(PATH){
+    document.addEventListener('click',e=>{
+      if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey)return;
+      const a=e.target.closest('a[href^="#"]');if(!a)return;const h=a.getAttribute('href').slice(1);if(!h)return;
+      const onQ=/^\/orcamento\/?$/.test(location.pathname);
+      if(isQ(h)){e.preventDefault();history.pushState({cat:h.split('-')[1]||null},'','/orcamento');route();return}
+      if(onQ){e.preventDefault();history.pushState(null,'','/'+(h==='inicio'?'':'#'+h));route()}
+    });
+    addEventListener('popstate',route);
+  }
   addEventListener('hashchange',route);route();
 })();
 
