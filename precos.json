@@ -4,6 +4,8 @@
  "g_min": 250,
  "g_desc_acima": 450,
  "g_desc_pct": 5,
+ "g_desc2_acima": 1000,
+ "g_desc2_pct": 7,
  "r180": 248,
  "r200": 275,
  "r210": 289,

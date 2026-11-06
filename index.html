@@ -866,14 +866,16 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const sv=(vb,inner)=>`<svg class="fig" viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
 const F={
   retratil(m){const w=m*42,x=(160-w)/2;return sv('0 0 160 64',`<rect x="${x+6}" y="6" width="${w-12}" height="20" rx="5"/><rect x="${x}" y="18" width="10" height="26" rx="4"/><rect x="${x+w-10}" y="18" width="10" height="26" rx="4"/><rect class="f" x="${x+10}" y="26" width="${w-20}" height="12" rx="3"/><path d="M${80} 26v12"/><rect class="d" x="${x+12}" y="38" width="${w-24}" height="9" rx="2"/><path class="dim" d="M${x} 57H${x+w}M${x} 53v8M${x+w} 53v8"/>`)},
-  fixo(n){if(n==='L')return sv('0 0 160 64',`<path d="M24 8h112v18H44v32H24z"/><path class="f" d="M44 26h92v14H60v18H44z"/><path d="M136 26v18M24 58h20"/><path class="dim" d="M24 62H140"/>`);
+  fixo(n,ch){if(n==='L')return sv('0 0 160 64',`<path d="M24 8h112v18H44v32H24z"/><path class="f" d="M44 26h92v14H60v18H44z"/><path d="M136 26v18M24 58h20"/><path class="dim" d="M24 62H140"/>`);
     const w=34+n*28,x=(160-w)/2,cw=(w-20)/n;let c='';for(let i=0;i<n;i++)c+=`<rect class="f" x="${x+10+i*cw+1}" y="28" width="${cw-2}" height="14" rx="3"/>`;
-    return sv('0 0 160 64',`<rect x="${x+6}" y="8" width="${w-12}" height="22" rx="5"/><rect x="${x}" y="20" width="10" height="28" rx="4"/><rect x="${x+w-10}" y="20" width="10" height="28" rx="4"/>${c}<path d="M${x+6} 48v6M${x+w-6} 48v6"/>`)},
+    const chs=ch?`<rect class="f" x="${x+10+(n-1)*cw+1}" y="42" width="${cw-2}" height="16" rx="3"/><path d="M${x+10+(n-1)*cw+1} 42v16h${cw-2}"/>`:'';
+    return sv('0 0 160 64',`<rect x="${x+6}" y="8" width="${w-12}" height="22" rx="5"/><rect x="${x}" y="20" width="10" height="28" rx="4"/><rect x="${x+w-10}" y="20" width="10" height="${ch?38:28}" rx="4"/>${c}${chs}<path d="M${x+6} 48v6M${x+w-6} ${ch?58:48}v${ch?4:6}"/>`)},
   modulo(t){const k={
       sem:`<rect x="12" y="8" width="46" height="20" rx="5"/><rect class="f" x="12" y="28" width="46" height="20" rx="4"/>`,
       com:`<rect x="16" y="8" width="44" height="20" rx="5"/><rect x="6" y="20" width="10" height="30" rx="4"/><rect class="f" x="16" y="28" width="44" height="20" rx="4"/>`,
       canto:`<path d="M10 8h50v18H28v30H10z"/><path class="f" d="M28 26h32v22H28z"/>`,
       chaise:`<rect x="12" y="6" width="46" height="16" rx="5"/><rect class="f" x="12" y="22" width="46" height="36" rx="4"/><path class="d" d="M12 40h46"/>`,
+      chaiseb:`<rect x="8" y="6" width="44" height="16" rx="5"/><rect class="f" x="8" y="22" width="44" height="36" rx="4"/><rect x="52" y="14" width="10" height="44" rx="4"/><path class="d" d="M8 40h44"/>`,
       puff:`<rect class="f" x="16" y="22" width="38" height="28" rx="6"/><path d="M16 30h38"/>`};return sv('0 0 70 60',k[t])},
   modulado(){return sv('0 0 160 64',`<rect x="10" y="6" width="42" height="22" rx="5"/><rect x="54" y="6" width="42" height="22" rx="5"/><rect x="98" y="6" width="42" height="22" rx="5"/><rect class="f" x="10" y="28" width="42" height="20" rx="4"/><rect class="f" x="54" y="28" width="42" height="20" rx="4"/><rect class="f" x="98" y="28" width="42" height="34" rx="4"/>`)},
   colchao(W,L){const w=W*42,h=Math.min(L*42,86),x=(100-w)/2,y=(100-h)/2;const n=W>=1.2?2:1,pw=(w-12-(n-1)*4)/n;let p='';for(let i=0;i<n;i++)p+=`<rect x="${x+6+i*(pw+4)}" y="${y+5}" width="${pw}" height="11" rx="4"/>`;
@@ -913,9 +915,9 @@ const CAT=[
   opc:[['r180','1,80 m',1.8],['r200','2,00 m',2],['r210','2,10 m',2.1],['r230','2,30 m',2.3],['r250','2,50 m',2.5],['r270','2,70 m',2.7],['r290','2,90 m',2.9],['r300','3,00 m',3],['r350','3,50 m',3.5]].map(([id,l,m])=>({id,l,fig:()=>F.retratil(m),ref:Math.round(m*100)})),
   nota:'Maior que 3,50 m? Envie a medida nos detalhes.',extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'fixo',nome:'Sofá fixo',icon:()=>F.fixo(3),hint:'Sofá sem assento retrátil. Escolha pelo número de lugares.',grupo:'Lugares',tipo:'opc',imper:true,qtd:true,
-  opc:[{id:'f2',l:'2 lugares',fig:()=>F.fixo(2),ref:150},{id:'f3',l:'3 lugares',fig:()=>F.fixo(3),ref:180},{id:'f4',l:'4 lugares',fig:()=>F.fixo(4),ref:220},{id:'fL',l:'De canto (L)',fig:()=>F.fixo('L'),ref:280}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
+  opc:[{id:'f2',l:'2 lugares',fig:()=>F.fixo(2),ref:150},{id:'f2c',l:'2 lugares com chaise',s:'Um dos lugares é chaise',fig:()=>F.fixo(2,1),ref:200},{id:'f3',l:'3 lugares',fig:()=>F.fixo(3),ref:180},{id:'f3c',l:'3 lugares com chaise',s:'Um dos lugares é chaise',fig:()=>F.fixo(3,1),ref:230},{id:'f4',l:'4 lugares',fig:()=>F.fixo(4),ref:220},{id:'fL',l:'De canto (L)',fig:()=>F.fixo('L'),ref:280}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'modulado',nome:'Sofá modulado',icon:()=>F.modulado(),hint:'Some os módulos do seu sofá. Cada peça separada conta como um módulo.',tipo:'mod',imper:true,qtd:false,
-  mods:[{id:'m_com',l:'Módulo com braço',s:'Ponta do sofá',t:'com',ref:80},{id:'m_sem',l:'Módulo sem braço',s:'Meio do sofá',t:'sem',ref:70},{id:'m_canto',l:'Módulo de canto',s:'Faz a curva do L',t:'canto',ref:90},{id:'m_chaise',l:'Chaise',s:'Assento alongado',t:'chaise',ref:100},{id:'m_puff',l:'Puff',s:'Peça solta',t:'puff',ref:40}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
+  mods:[{id:'m_com',l:'Módulo com braço',s:'Ponta do sofá',t:'com',ref:80},{id:'m_sem',l:'Módulo sem braço',s:'Meio do sofá',t:'sem',ref:70},{id:'m_canto',l:'Módulo de canto',s:'Faz a curva do L',t:'canto',ref:90},{id:'m_chaise',l:'Chaise',s:'Assento alongado',t:'chaise',ref:100},{id:'m_chaiseb',l:'Chaise com braço',s:'Assento alongado na ponta',t:'chaiseb',ref:110},{id:'m_puff',l:'Puff',s:'Peça solta',t:'puff',ref:40}],extras:[{id:'alm',l:'Almofadas soltas',s:'De encosto ou decorativas',modo:'qtd',shared:true,ref:15}],},
  {id:'colchao',nome:'Colchão',icon:()=>F.colchaoIcon(),hint:'Medidas padrão de colchões no Brasil. Confira a etiqueta se tiver dúvida.',grupo:'Tamanho',tipo:'opc',imper:true,qtd:true,
   opc:[['c_solt','Solteiro','0,88 × 1,88 m',.88,1.88,120],['c_soltk','Solteiro King','0,96 × 2,03 m',.96,2.03,140],['c_viuva','Viúva','1,28 × 1,88 m',1.28,1.88,150],['c_casal','Casal padrão','1,38 × 1,88 m',1.38,1.88,160],['c_queen','Queen','1,58 × 1,98 m',1.58,1.98,190],['c_king','King Size','1,93 × 2,03 m',1.93,2.03,220]].map(([id,l,s,W,L,ref])=>({id,l,s,fig:()=>F.colchao(W,L),ref})),
   extras:[{id:'c_2lados',l:'Higienizar os dois lados',s:'Para colchões dupla face',modo:'pct',ref:50},{id:'c_box',l:'Incluir a base box',s:'Tecido da base da cama',modo:'add',ref:50}]},
@@ -945,7 +947,7 @@ let P={};
 const pv=id=>typeof P[id]==='number'&&isFinite(P[id])?P[id]:null;
 
 // ---------- state ----------
-const DEF={retratil:3,colchao:3,cabeceira:2,fixo:1,cadeira:1,escritorio:1,poltrona:1};
+const DEF={retratil:3,colchao:3,cabeceira:2,fixo:2,cadeira:1,escritorio:1,poltrona:1};
 const blank=c=>({cat:c.id,opc:c.opc?c.opc[Math.min(DEF[c.id]||0,c.opc.length-1)].id:null,qtd:c.id==='cadeira'?4:1,imper:false,ex:{},mods:{m_com:2,m_sem:1},larg:'',comp:'',metros:''});
 let cur=blank(CAT[0]);
 let cart=[];
@@ -1019,7 +1021,7 @@ function live(){
   if(r.empty)lp.innerHTML=`<small>Valor</small><b class="na">${r.needs||'Escolha ao menos um módulo'}</b>`;
   else lp.innerHTML=`<small>${r.q>1?r.q+' × '+(r.pend?'—':brl(r.unit)):'Valor'}</small>${r.pend?'<b class="na">a confirmar</b>':`<b>${brl(r.total)}</b>`}`;
   $('#addBtn').disabled=!!r.empty;
-  if(c.tipo==='mod'){const seq=[];const add=(t,n)=>{for(let i=0;i<n;i++)seq.push(t)};const m=cur.mods;add('canto',m.m_canto||0);const ends=m.m_com||0;add('com',Math.min(1,ends));add('sem',m.m_sem||0);add('chaise',m.m_chaise||0);add('comR',Math.max(0,ends-1));add('puff',m.m_puff||0);
+  if(c.tipo==='mod'){const seq=[];const add=(t,n)=>{for(let i=0;i<n;i++)seq.push(t)};const m=cur.mods;add('canto',m.m_canto||0);const ends=m.m_com||0;add('com',Math.min(1,ends));add('sem',m.m_sem||0);add('chaise',m.m_chaise||0);add('chaiseb',m.m_chaiseb||0);add('comR',Math.max(0,ends-1));add('puff',m.m_puff||0);
     $('#modPrev').innerHTML=seq.length?seq.map(t=>t==='comR'?F.modulo('com').replace('<svg','<svg style="transform:scaleX(-1)"'):F.modulo(t)).join(''):'<p>Adicione módulos para montar o desenho.</p>'}
   if(c.tipo==='tap'){const l=num(cur.larg),w=num(cur.comp);$('#rugPrev').innerHTML=F.tapeteLive(l>0?l:0,w>0?w:0);$('#m2').innerHTML=l>0&&w>0?`Área: <b>${fmt2(l)} × ${fmt2(w)} = ${fmt2(l*w)} m²</b>${pv(c.minId)!=null?` · mínimo por tapete ${brl(pv(c.minId))}`:''}`:'Ex.: 2,00 × 2,50'}
 }
