@@ -56,5 +56,12 @@
  "t_min": 150,
  "ct_leve": 28,
  "ct_pesada": 35,
- "ct_inst": 1
+ "ct_inst": 1,
+ "tx_deb": 0,
+ "tx_c1": 0,
+ "tx_c2": 5.79,
+ "tx_c3": 6.09,
+ "tx_c4": 7.99,
+ "tx_c5": 8.09,
+ "tx_c6": 8.19
 }
