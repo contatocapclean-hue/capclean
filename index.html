@@ -1000,8 +1000,8 @@ function calc(st){
 }
 function minFor(c){let vals=[];if(c.tipo==='mod')vals=c.mods.map(m=>pv(m.id));else vals=c.opc.map(o=>pv(o.id));vals=vals.filter(v=>v!=null);if(!vals.length)return null;
   const m=Math.min(...vals);return c.tipo==='tap'?'R$ '+fmt2(m).replace(',00','')+'/m²':c.tipo==='cor'?'R$ '+fmt2(m).replace(',00','')+'/m':'a partir de '+brl(m).replace(',00','')}
-function totals(){let sub=0,pend=false,n=0;cart.forEach(i=>{const r=calc(i);if(r.empty)return;n+=r.q;sub+=r.total;if(r.pend)pend=true});
-  const{desc,ap,nx}=discount(sub);
+function totals(noDisc){let sub=0,pend=false,n=0;cart.forEach(i=>{const r=calc(i);if(r.empty)return;n+=r.q;sub+=r.total;if(r.pend)pend=true});
+  const{desc,ap,nx}=noDisc?{desc:0,ap:null,nx:null}:discount(sub);
   const min=pv('g_min');let tot=sub-desc,minApplied=false;if(cart.length&&min!=null&&tot<min){tot=min;minApplied=true}
   return{sub,desc,tot,pend,n,minApplied,min,ap,nx}}
 
@@ -1081,11 +1081,12 @@ function renderCart(){
   const L=$('#cartList');
   if(!cart.length){L.innerHTML=`<div class="empty">${F.retratil(2.2)}<b style="color:var(--ink)">Nenhum item ainda</b>Escolha um item ao lado, ajuste os detalhes e toque em "Adicionar ao orçamento".</div>`}
   else L.innerHTML='<ul class="items">'+cart.map((it,i)=>{const r=calc(it),c=byId[it.cat];return`<li class="item">${c.icon()}<div><b>${esc(r.label)}</b>${r.det?`<small>${esc(r.det)}</small>`:''}</div><div class="r">${r.pend?'<span class="v na">a confirmar</span>':`<span class="v">${brl(r.total)}</span>`}<div class="ctl">${c.qtd?`<div class="stepper sm" data-i="${i}"><button type="button" data-d="-1" aria-label="Diminuir">−</button><output>${r.q}</output><button type="button" data-d="1" aria-label="Aumentar">+</button></div>`:''}<button type="button" class="rm" data-rm="${i}" aria-label="Remover ${esc(r.label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div></div></li>`}).join('')+'</ul>';
-  const t=totals();
+  const t=totals(isParc()),tv=totals();
   let s='';if(cart.length){s+=`<div><span>Subtotal (${t.n} ${t.n===1?'peça':'peças'})</span><span>${brl(t.sub)}</span></div>`;
     const pc=v=>String(v).replace('.',',');
     if(t.desc)s+=`<div class="good"><span>Desconto de ${pc(t.ap[1])}%</span><span>− ${brl(t.desc)}</span></div>`;
-    if(t.nx&&t.sub>0)s+=`<span class="hint up">${t.ap?'🎉 ':''}Faltam <b>${brl(t.nx[0]-t.sub)}</b> para ganhar <b>${pc(t.nx[1])}% de desconto</b>${t.ap?' (em vez de '+pc(t.ap[1])+'%)':''}.</span>`;
+    if(isParc()&&tv.desc)s+=`<span class="hint">O desconto de ${pc(tv.ap[1])}% vale no Pix, dinheiro, débito ou crédito à vista. No parcelado a partir de 2x não há desconto.</span>`;
+    if(!isParc()&&t.nx&&t.sub>0)s+=`<span class="hint up">${t.ap?'🎉 ':''}Faltam <b>${brl(t.nx[0]-t.sub)}</b> para ganhar <b>${pc(t.nx[1])}% de desconto</b>${t.ap?' (em vez de '+pc(t.ap[1])+'%)':''}.</span>`;
     s+=`<div class="tot"><span>Total estimado</span><b class="grad">${brl(t.tot)}</b></div>`;
     if(t.minApplied)s+=`<span class="hint">Aplicado o valor mínimo do atendimento (${brl(t.min)}).</span>`;
     if(t.pend)s+=`<span class="hint">Itens "a confirmar" serão orçados pela nossa equipe no WhatsApp.</span>`}
@@ -1097,31 +1098,33 @@ function renderCart(){
 $('#cartList').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){cart.splice(+rm.dataset.rm,1);save();renderCart();renderCats();return}
   const d=e.target.closest('[data-d]');if(d){const i=+d.parentElement.dataset.i;cart[i].qtd=Math.max(1,Math.min(50,(cart[i].qtd||1)+(+d.dataset.d)));save();renderCart()}});
 // ---------- pagamento ----------
-function payState(){const t=totals(),pag=$('#qPag').value;const r={pag,tot:t.tot,txt:pag,val:t.tot};
+// crédito a partir de 2x não tem desconto
+const isParc=()=>$('#qPag').value==='Crédito'&&(+$('#qParc').value||1)>=2;
+function payState(){const t=totals(isParc()),pag=$('#qPag').value;const r={pag,tot:t.tot,txt:pag,val:t.tot};
   if(pag==='Débito'){const f=pv('tx_deb');if(f){r.val=withFee(t.tot,f)}r.txt='Débito';}
   if(pag==='Crédito'){const n=+$('#qParc').value||1,f=pv('tx_c'+n);r.n=n;r.f=f;if(f!=null)r.val=withFee(t.tot,f);r.parc=Math.round(r.val/n*100)/100;r.txt=n===1?'Crédito à vista':`Crédito em ${n}x`}
   return r}
 function renderPay(){
   document.querySelectorAll('#paySeg [data-pay]').forEach(b=>b.setAttribute('aria-checked',b.dataset.pay===$('#qPag').value));
-  const t=totals(),pag=$('#qPag').value,box=$('#parcBox'),sel=$('#qParc'),info=$('#payInfo');
+  const t=totals(isParc()),pag=$('#qPag').value,box=$('#parcBox'),sel=$('#qParc'),info=$('#payInfo');const tAv=totals(),tPar=totals(true);
   box.hidden=pag!=='Crédito';
   if(pag==='Crédito'){const max=Math.max(1,Math.min(12,pv('parc_max')||12));const prev=window.__parcWant||sel.value;window.__parcWant=null;
     const opts=[];for(let n=1;n<=max;n++){const f=pv('tx_c'+n);if(f==null&&n>1&&pv('tx_c1')!=null)continue;
       if(!cart.length){opts.push(`<option value="${n}">${n===1?'À vista (1x)':n+'x'}</option>`);continue}
-      const v=f!=null?withFee(t.tot,f):null;opts.push(`<option value="${n}">${n===1?'1x':n+'x'} ${v!=null?'de '+brl(Math.round(v/n*100)/100)+(n>1?' (total '+brl(v)+')':''):'(valor a confirmar)'}</option>`)}
+      const v=f!=null?withFee((n>=2?tPar:tAv).tot,f):null;opts.push(`<option value="${n}">${n===1?'1x':n+'x'} ${v!=null?'de '+brl(Math.round(v/n*100)/100)+(n>1?' (total '+brl(v)+')':''):'(valor a confirmar)'}</option>`)}
     sel.innerHTML=opts.join('');if(prev&&sel.querySelector(`option[value="${prev}"]`))sel.value=prev}
   if(!cart.length){info.textContent='';return}
   const p=payState();
   if(pag==='Pix'||pag==='Dinheiro')info.innerHTML=`À vista no ${pag==='Pix'?'Pix':'dinheiro'}: <b>${brl(p.val)}</b>`;
   else if(pag==='Débito')info.innerHTML=`No débito: <b>${brl(p.val)}</b>`;
-  else info.innerHTML=p.f==null?`${p.n}x no crédito: valor confirmado pela nossa equipe.`:(p.n===1?`Crédito à vista: <b>${brl(p.val)}</b>`:`<b>${p.n}x de ${brl(p.parc)}</b> · total no cartão ${brl(p.val)}`);
+  else info.innerHTML=p.f==null?`${p.n}x no crédito: valor confirmado pela nossa equipe.`:(p.n===1?`Crédito à vista: <b>${brl(p.val)}</b>`:`<b>${p.n}x de ${brl(p.parc)}</b> · total no cartão ${brl(p.val)}${tAv.desc?' <small>(sem desconto)</small>':''}`);
   if(t.pend)info.innerHTML+=' <small>(+ itens a confirmar)</small>';
 }
-$('#paySeg').addEventListener('click',e=>{const b=e.target.closest('[data-pay]');if(!b)return;$('#qPag').value=b.dataset.pay;renderPay();save();updSend()});
-$('#qParc').addEventListener('change',()=>{renderPay();save();updSend()});
-function msg(){const t=totals();const L=['Olá, CapClean! Montei meu orçamento pelo site:',''];
+$('#paySeg').addEventListener('click',e=>{const b=e.target.closest('[data-pay]');if(!b)return;$('#qPag').value=b.dataset.pay;renderCart();save()});
+$('#qParc').addEventListener('change',()=>{window.__parcWant=$('#qParc').value;renderCart();save()});
+function msg(){const t=totals(isParc());const L=['Olá, CapClean! Montei meu orçamento pelo site:',''];
   cart.forEach(it=>{const r=calc(it);L.push(`• ${r.q>1?r.q+'× ':''}${r.label}${r.det?' ('+r.det+')':''} — ${r.pend?'a confirmar':brl(r.total)}`)});
-  L.push('');if(t.desc)L.push(`Desconto (${String(t.ap[1]).replace('.',',')}%): − ${brl(t.desc)}`);L.push(`Total estimado: ${brl(t.tot)}${t.pend?' + itens a confirmar':''}`);
+  L.push('');if(t.desc)L.push(`Desconto (${String(t.ap[1]).replace('.',',')}%): − ${brl(t.desc)}`);L.push(`Total estimado: ${brl(t.tot)}${t.pend?' + itens a confirmar':''}${isParc()&&totals().desc?' (sem desconto no parcelado)':''}`);
   const n=$('#qNome').value.trim(),b=$('#qBairro').value.trim(),d=$('#qData').value,p=$('#qPeriodo').value;
   L.push('');if(n)L.push('Nome: '+n);const ci=$('#qCidade').value;L.push('Local: '+(b?b+', ':'')+ci);if(d){const[y,m,dd]=d.split('-');L.push(`Data preferida: ${dd}/${m}/${y} (${p.toLowerCase()})`)}else L.push('Período preferido: '+p.toLowerCase());
   const pp=payState();if(cart.length){let s='Pagamento: '+pp.txt;if(pp.pag==='Crédito'&&pp.f!=null)s+=pp.n>1?` de ${brl(pp.parc)} (total ${brl(pp.val)})`:` (${brl(pp.val)})`;else if(pp.pag==='Débito'&&pv('tx_deb'))s+=` (${brl(pp.val)})`;L.push(s)}
